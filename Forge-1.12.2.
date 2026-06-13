@@ -1,0 +1,220 @@
+From The MCreator mod:
+
+// ============= ADD ENTITIES ============= \\
+public static final Set<Entity> ENTITIES = new HashSet<>();
+// And in entity joining world events:
+@SubscribeEvent
+public void entityJoin(EntityJoinWorldEvent event) {
+	Entity entity = event.getEntity();
+	if (entity.world == null) return;
+	if (entity == null) return;
+  if (!(entity instanceof EntityPlayer)) { // You can choose to track players or not.
+    ENTITIES.add(entity);
+  }
+}
+// When you want to perform a range attack, you can use, for example:
+public static void attackAll(Player org) {
+  if (org == null) return;
+	Set<Entity> toKill = new HashSet<>();
+  for (Entity e : ENTITIES) {
+    if (e != null && e != org) {
+      toKill.add(e); //Add every entities joined.
+    }
+  }
+  toKill.remove(org);
+  for (Entity e : toKill) {
+    // Handle logic in here.
+  }
+}
+
+// ============= BAN ENTITIES ============= \\
+private static final Set<String> dead = new HashSet<>();
+public static void addE(Entity entity) {
+	dead.add(entity.getClass().getName());
+}
+public static boolean isE(Entity entity) {
+	return dead.contains(entity.getClass().getName());
+}
+
+private static void killEntity(Entity entity) {
+  if (entity == null) return;
+  addE(entity); // Add into the Set.
+}
+
+@SubscribeEvent
+public void entityJoin(EntityJoinWorldEvent event) {
+  Entity entity = event.getEntity();
+  if (entity.world == null) return;
+  if (entity == null) return;
+  if (isE(entity)) {
+    event.setCanceled(true); // Banned entity.
+  }
+}
+
+// ============= SET HEALTH FOR LIVING ENTITY ============= \\
+private static void forceSetHealth(EntityLivingBase living, float amount) {
+  NBTTagCompound nbtTagCompound = new NBTTagCompound();
+  living.setHealth(amount);
+  living.getEntityData().setFloat("Health", amount);
+  living.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(amount);
+  living.writeEntityToNBT(nbtTagCompound);
+  nbtTagCompound.setFloat("Health", amount);
+  living.readEntityFromNBT(nbtTagCompound);
+  living.heal(amount);
+  for (EntityDataManager.DataEntry<?> entry : living.getDataManager().getAll()) {
+    if (entry instanceof EntityDataManager.DataEntry && entry.getValue() instanceof Float) {
+      EntityDataManager.DataEntry<Float> floatEntry = (EntityDataManager.DataEntry<Float>) entry;
+      living.getDataManager().set((DataParameter<Float>) floatEntry.getKey(), amount);
+    }
+  }
+}
+
+// ============= USING MINECRAFT SERVER INSTANCE. ============= \\
+private static void findEntitiesOrWorld() {
+  Minecraft mc = Minecraft.getMinecraft();
+  MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+  IntegratedServer dserver = mc.getIntegratedServer(); // Only for single player world.
+  for (World w : server.worlds) {
+    if (w instanceof WorldServer) {
+      WorldServer ws = (WorldServer) w;
+      // Do something here.
+    }
+  }
+  // Same with dserver.
+}
+
+// ============= FREEZE ENTITIES. ============= \\
+private static void updateEntity(Entity entity) {
+  if (entity instanceof EntityPlayer) return;
+  if (entity instanceof EntityItem) return;
+  double fixedX = entity.posX;
+  double fixedY = entity.posY;
+  double fixedZ = entity.posZ;
+  entity.onAddedToWorld();
+  entity.onCollideWithPlayer(null);
+  if (entity instanceof EntityLiving) {
+    EntityLiving living = (EntityLiving) entity;
+    living.setNoAI(true);
+    living.arrowHitTimer = 0;
+    living.fallDistance = 0.0f;
+    living.isSwingInProgress = false;
+    living.stepHeight = 0.0f;
+    living.setArrowCountInEntity(0);
+    living.resetActiveHand();
+    living.tasks.taskEntries.clear();
+    living.targetTasks.taskEntries.clear();
+    living.forceSpawn = true;
+  } // There is a small logic problem here. But it doesn't affect the result.
+	if (entity instanceof EntityLivingBase) {
+		EntityLivingBase living = (EntityLivingBase) entity;
+		if (living.getHealth() <= 0.0f || !(living.isEntityAlive()) || living.isDead) {
+			living.setDead();
+      living.isDead = true;
+			living.setHealth(0.0f);
+			living.attackEntityFrom(DamageSource.OUT_OF_WORLD, Float.MAX_VALUE);
+		}
+		living.setLastAttackedEntity(null);
+		living.setRevengeTarget(null);
+		living.setLastAttackedEntity(null);
+    living.setEntityInvulnerable(true);
+		living.setAIMoveSpeed(0.0f);
+		living.sendEndCombat();
+		living.limbSwing = 0.0f;
+		living.limbSwingAmount = 0.0f;
+		living.prevLimbSwingAmount = 0.0f;
+		living.setJumping(false);
+		living.setInWeb();
+		living.deathTime = 0;
+		living.moveForward = 0.0f;
+		living.moveStrafing = 0.0f;
+		living.moveVertical = 0.0f;
+		living.rotationYaw = living.prevRotationYaw;
+		living.rotationPitch = living.prevRotationYaw;
+		living.rotationYawHead = living.prevRotationYawHead;
+		living.renderYawOffset = living.prevRenderYawOffset;
+		living.timeUntilPortal = 0;
+		living.swingProgress = 0.0f;
+		living.swingProgressInt = 0;
+		living.ticksExisted = 0;
+		living.setSneaking(false);
+		living.setSprinting(false);
+		living.velocityChanged = false;
+		living.setSilent(true);
+		living.setAlwaysRenderNameTag(false);
+		living.setGlowing(false);
+		living.stepHeight = 0.0f;
+		living.clearActivePotions();
+		living.setDropItemsWhenDead(true);
+		living.moveForward = 0.0f;
+		living.moveStrafing = 0.0f;
+		living.moveVertical = 0.0f;
+	}
+	entity.setCustomNameTag(entity.getName());
+	entity.getLook(0.0f);
+  entity.removePassengers();
+	entity.setAlwaysRenderNameTag(false);
+	entity.captureDrops = true;
+  entity.addedToChunk = true;
+	entity.distanceWalkedModified = 0.0f;
+	entity.distanceWalkedOnStepModified = 0.0f;
+  entity.isAirBorne = false;
+	entity.noClip = true;
+	entity.setAir(entity.getAir());
+	entity.ignoreFrustumCheck = false;
+	entity.posX = entity.lastTickPosX;
+	entity.posY = entity.lastTickPosY;
+	entity.posZ = entity.lastTickPosZ;
+	entity.prevPosX = entity.posX;
+	entity.prevPosY = entity.posY;
+	entity.prevPosZ = entity.posZ;
+	entity.motionX = 0;
+	entity.motionY = 0;
+	entity.motionZ = 0;
+	entity.chunkCoordX = ((int) fixedX) >> 4;
+	entity.chunkCoordY = ((int) fixedY) >> 4;
+	entity.chunkCoordZ = ((int) fixedZ) >> 4;
+	entity.serverPosX = (long)(fixedX * 32.0D);
+	entity.serverPosY = (long)(fixedY * 32.0D);
+	entity.serverPosZ = (long)(fixedZ * 32.0D);
+	entity.onGround = true;
+	entity.setInvisible(false);
+	entity.setOutsideBorder(false);
+	entity.collided = false;
+	entity.collidedHorizontally = false;
+	entity.collidedVertically = false;
+	entity.copyLocationAndAnglesFrom(entity);
+	entity.setPosition(entity.prevPosX, entity.prevPosY, entity.prevPosZ);
+	entity.updateBlocked = true;
+}
+
+// ============= RENDER ATTACKS ============= \\
+@SubscribeEvent
+public static void onRenderLivingPre(RenderLivingEvent.Pre<?> event) {
+  Entity entity = event.getEntity();
+  if (!(entity instanceof EntityPlayer) && isE(entity)) {
+    entity.width = 0.0f;
+    entity.height = 0.0f;
+    event.setCanceled(true);
+  }
+}
+
+@SubscribeEvent
+public static void onRenderLivingSpecialsPre(RenderLivingEvent.Specials.Pre<?> event) {
+  Entity entity = event.getEntity();
+  if (!(entity instanceof EntityPlayer) && isE(entity)) {
+    entity.width = 0.0f;
+    entity.height = 0.0f;
+    event.setCanceled(true);
+  }
+}
+
+// Or you can use this for attacking render entities.
+private static BufferedImage loadNullImage() {
+  try (InputStream is = Minecraft.getMinecraft().getResourceManager().getResource(new ResourceLocation("mcreator", "textures/null.png")).getInputStream()) {
+    return ImageIO.read(is);
+  } catch (IOException e) {
+    throw new RuntimeException("Failed to load null texture", e);
+  }
+}
+// But to use effectively, you may need to use ASM, or Unsafe and Reflection.
+// There will be more updates in the future.
