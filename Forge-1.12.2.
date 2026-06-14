@@ -1,14 +1,14 @@
 From The MCreator mod:
 
 // ============= ADD ENTITIES ============= \\
-public static final Set<Entity> ENTITIES = new HashSet<>();
+public static final Set<Entity> ENTITIES = new HashSet<>(); // Do you think it should be synchronized?
 // And in entity joining world events:
 @SubscribeEvent
 public void entityJoin(EntityJoinWorldEvent event) {
 	Entity entity = event.getEntity();
-	if (entity.world == null) return;
 	if (entity == null) return;
-  if (!(entity instanceof EntityPlayer)) { // You can choose to track players or not.
+	if (entity.world == null) return;
+  	if (!(entity instanceof EntityPlayer)) { // You can choose to track players or not.
     ENTITIES.add(entity);
   }
 }
@@ -38,7 +38,7 @@ public static boolean isE(Entity entity) {
 
 private static void killEntity(Entity entity) {
   if (entity == null) return;
-  addE(entity); // Add into the Set.
+  addE(entity); // Add entity class, instead of instance or UUID the Set.
 }
 
 @SubscribeEvent
@@ -85,38 +85,38 @@ private static void findEntitiesOrWorld() {
 
 // ============= FREEZE ENTITIES. ============= \\
 private static void updateEntity(Entity entity) {
-  if (entity instanceof EntityPlayer) return;
-  if (entity instanceof EntityItem) return;
-  double fixedX = entity.posX;
-  double fixedY = entity.posY;
-  double fixedZ = entity.posZ;
-  entity.onAddedToWorld();
-  entity.onCollideWithPlayer(null);
-  if (entity instanceof EntityLiving) {
-    EntityLiving living = (EntityLiving) entity;
-    living.setNoAI(true);
-    living.arrowHitTimer = 0;
-    living.fallDistance = 0.0f;
-    living.isSwingInProgress = false;
-    living.stepHeight = 0.0f;
-    living.setArrowCountInEntity(0);
-    living.resetActiveHand();
-    living.tasks.taskEntries.clear();
-    living.targetTasks.taskEntries.clear();
-    living.forceSpawn = true;
-  } // There is a small logic problem here. But it doesn't affect the result.
+  	if (entity instanceof EntityPlayer) return;
+  	if (entity instanceof EntityItem) return;
+  	double fixedX = entity.posX;
+  	double fixedY = entity.posY;
+  	double fixedZ = entity.posZ;
+  	// entity.onAddedToWorld();
+  	// entity.onCollideWithPlayer(null);
+  	if (entity instanceof EntityLiving) {
+    	EntityLiving living = (EntityLiving) entity;
+    	living.setNoAI(true);
+    	living.arrowHitTimer = 0;
+    	living.fallDistance = 0.0f;
+    	living.isSwingInProgress = false;
+    	living.stepHeight = 0.0f;
+    	living.setArrowCountInEntity(0);
+    	living.resetActiveHand();
+    	living.tasks.taskEntries.clear();
+    	living.targetTasks.taskEntries.clear();
+    	living.forceSpawn = true;
+  	} // There is a small logic problem here. But it doesn't affect the result.
 	if (entity instanceof EntityLivingBase) {
 		EntityLivingBase living = (EntityLivingBase) entity;
 		if (living.getHealth() <= 0.0f || !(living.isEntityAlive()) || living.isDead) {
 			living.setDead();
-      living.isDead = true;
+      		living.isDead = true;
 			living.setHealth(0.0f);
 			living.attackEntityFrom(DamageSource.OUT_OF_WORLD, Float.MAX_VALUE);
 		}
 		living.setLastAttackedEntity(null);
 		living.setRevengeTarget(null);
 		living.setLastAttackedEntity(null);
-    living.setEntityInvulnerable(true);
+    	living.setEntityInvulnerable(true);
 		living.setAIMoveSpeed(0.0f);
 		living.sendEndCombat();
 		living.limbSwing = 0.0f;
@@ -151,13 +151,13 @@ private static void updateEntity(Entity entity) {
 	}
 	entity.setCustomNameTag(entity.getName());
 	entity.getLook(0.0f);
-  entity.removePassengers();
+  	entity.removePassengers();
 	entity.setAlwaysRenderNameTag(false);
 	entity.captureDrops = true;
-  entity.addedToChunk = true;
+  	entity.addedToChunk = true;
 	entity.distanceWalkedModified = 0.0f;
 	entity.distanceWalkedOnStepModified = 0.0f;
-  entity.isAirBorne = false;
+  	entity.isAirBorne = false;
 	entity.noClip = true;
 	entity.setAir(entity.getAir());
 	entity.ignoreFrustumCheck = false;
