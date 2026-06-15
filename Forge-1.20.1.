@@ -105,4 +105,131 @@ public static EntityRenderer<? super Entity> getRendererOf(Entity entity) {
 	if (renderer == null) renderer = (EntityRenderer<? super Entity>) dispatcher.getRenderer(entity);
 	return renderer;
 }
+
+// ============= FIELDS GETTER FOR MINECRAFT ============= \\
+public final class ReflectionHelp {
+
+	public static Object findFieldTree(Object obj, String fieldName, boolean returnValue, String... obfuscatedNames) { // Use this to handle mojang and obf name.
+	    if (obj == null) return null;
+	    if (fieldName == null) return null;
+	    Class<?> clazz = obj.getClass();
+	    String cacheKey = clazz.getName() + "#" + fieldName;
+	    VarHandle vh = varHandleCache.get(cacheKey);
+	    if (vh != null) return returnValue ? vh.get(obj) : getFieldFromVarHandle(vh, clazz, fieldName);
+	    for (String obfName : obfuscatedNames) {
+	        String obfKey = clazz.getName() + "#" + obfName;
+	        vh = varHandleCache.get(obfKey);
+	        if (vh != null) return returnValue ? vh.get(obj) : getFieldFromVarHandle(vh, clazz, obfName);
+	    }
+	    for (Class<?> c = clazz; c != null && c != Object.class; c = c.getSuperclass()) {
+	        try {
+	            Field field = c.getDeclaredField(fieldName);
+	            field.setAccessible(true);
+	            VarHandle handle = MethodHandles.privateLookupIn(c, lookup).unreflectVarHandle(field);
+	            varHandleCache.put(cacheKey, handle);
+	            return returnValue ? handle.get(obj) : field;
+	        } catch (NoSuchFieldException ignored) {
+	        } catch (Exception e) {
+	            e.printStackTrace();
+	        }
+	        for (String obfName : obfuscatedNames) {
+	            try {
+	                Field field = c.getDeclaredField(obfName);
+	                field.setAccessible(true);
+	                VarHandle handle = MethodHandles.privateLookupIn(c, lookup).unreflectVarHandle(field);
+	                varHandleCache.put(clazz.getName() + "#" + obfName, handle);
+	                return returnValue ? handle.get(obj) : field;
+	            } catch (NoSuchFieldException ignored) {
+	            } catch (Exception e) {
+	                e.printStackTrace();
+	            }
+	        }
+	        for (Field field : c.getDeclaredFields()) {
+	            if (field.getName().contains(fieldName) || fieldName.contains(field.getName())) {
+	                try {
+	                    field.setAccessible(true);
+	                    VarHandle handle = MethodHandles.privateLookupIn(c, lookup).unreflectVarHandle(field);
+	                    varHandleCache.put(cacheKey, handle);
+	                    return returnValue ? handle.get(obj) : field;
+	                } catch (Exception e) {
+	                    e.printStackTrace();
+	                }
+	            }
+	        }
+	    }
+	    return null;
+	}
+	// For example: Vec3 entPos = (Vec3) ReflectionHelp.findFieldTree(entity, "position", true, "f_19825_");
+
+	static class CachedMethod {
+	    MethodHandle mh;
+	    boolean isStatic;
+	    CachedMethod(MethodHandle mh, boolean isStatic) {
+	        this.mh = mh;
+	        this.isStatic = isStatic;
+	    }
+	}
+	
+	static final Map<String, VarHandle> varHandleCache = new ConcurrentHashMap<>();
+	static final Map<String, CachedMethod> methodHandleCache = new ConcurrentHashMap<>();
+	static final Map<Field, Long> fieldOffsetCache = new ConcurrentHashMap<>();
+	static final MethodHandles.Lookup lookup = MethodHandles.lookup();
+	
+	private static Method findMethodInHierarchy(Class<?> clazz, String methodName, Class<?>[] paramTypes) {
+	    for (Class<?> c = clazz; c != null; c = c.getSuperclass()) {
+	        Method m = findInClass(c, methodName, paramTypes);
+	        if (m != null) return m;
+	        for (Class<?> iface : c.getInterfaces()) {
+	            m = findInInterfaces(iface, methodName, paramTypes);
+	            if (m != null) return m;
+	        }
+	    }
+	    return null;
+	}
+	
+	private static Method findInInterfaces(Class<?> iface, String methodName, Class<?>[] paramTypes) {
+	    Method m = findInClass(iface, methodName, paramTypes);
+	    if (m != null) return m;
+	    for (Class<?> parent : iface.getInterfaces()) {
+	        m = findInInterfaces(parent, methodName, paramTypes);
+	        if (m != null) return m;
+	    }
+	    return null;
+	}
+
+	private static Method findInClass(Class<?> c, String methodName, Class<?>[] paramTypes) {
+	    outer:
+	    for (Method m : c.getDeclaredMethods()) {
+	        if (!m.getName().equals(methodName)) continue;
+	        Class<?>[] mParams = m.getParameterTypes();
+	        if (mParams.length != paramTypes.length) continue;
+	        for (int i = 0; i < mParams.length; i++) {
+	            if (mParams[i] == paramTypes[i]) continue;
+	            if (mParams[i].isAssignableFrom(paramTypes[i])) continue;
+	            if (paramTypes[i].isAssignableFrom(mParams[i])) continue;
+	            if (mParams[i].getName().equals(paramTypes[i].getName())) continue;
+	            continue outer;
+	        }
+	        return m;
+	    }
+	    return null;
+	}
+	
+	private static Field getFieldFromVarHandle(VarHandle vh, Class<?> clazz, String fieldName) {
+	    if (clazz == null) return null;
+	    if (fieldName == null) return null;
+	    try {
+	        for (Class<?> c = clazz; c != null && c != Object.class; c = c.getSuperclass()) {
+	            try {
+	                Field f = c.getDeclaredField(fieldName);
+	                f.setAccessible(true);
+	                return f;
+	            } catch (NoSuchFieldException ignored) {}
+	        }
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
+	    return null;
+	} // Bad code. Still looking for a way to improve.
+}
 // There will be more updates in the future.
