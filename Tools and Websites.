@@ -21,3 +21,17 @@ Note: You can use IDA (Interactive Disassembler), it has more features than dogb
 2. Mixins (simple and powerful).
 3. Javassist (also simple and powerful).
 4. Bytebuddy (more advanced but more flexible, it can allocate an Instrumentation instance).
+5. Nashorn (deprecated from Java 11 and removed from Java 15). This provides runtime scripting.
+
+Small notes:
+1. I don't recommend using .jar obfuscators for mods. 
+- I understand you want to protect your code, but once you make a file public, you have to understand that it will eventually be reverse-engineered.
+- Additionally, popular obfuscators like ProGuard, yGuard, Skidfuscator, etc., are designed to disrupt standalone Java programs. Minecraft mods, however, are a very complex system, so using obfuscators on them can easily cause crashes or undefined behaviors.
+- The best ways to protect code are:
++ Rename field, method, class names before compiling. But remember not to rename important classes, for examples, main mod class.
++ Do not share your files. Okay, it sounds ridiculous, but it's absolutely true.
+2. To go far on this path, you ought to accept learning from others, including:
+- Seek advices from others.
+- Find information or videos on the internet (but sometimes these only provide basic guidance).
+- Learn by observing what others do (yes, through decompiling and reverse engineering).
+Don't worry about what other people say, because the results always matter, right?
