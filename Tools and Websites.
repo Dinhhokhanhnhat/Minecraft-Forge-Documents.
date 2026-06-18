@@ -17,11 +17,13 @@ Note: You can use IDA (Interactive Disassembler), it has more features than dogb
 6. Cheat engine(s) (if you are working with native level, but if you have the ability to deal with C++, I think you don't need these lists anymore).
 
 // ========== FAMOUS LIBRARIES AND APPLICATION PROGRAMMING INTERFACES ========== \\
-1. Java's ASM (Bytecode Manipulation), from org.objectweb.asm.
-2. Mixins (simple and powerful).
-3. Javassist (also simple and powerful).
-4. Bytebuddy (more advanced but more flexible, it can allocate an Instrumentation instance).
-5. Nashorn (deprecated from Java 11 and removed from Java 15). This provides runtime scripting.
+1. Access Transformer (AT - accesstransformer.cfg or extra_at.cfg).
+2. Core mod, transformers (IFMLLoadingPlugin + IClassTransformer/ITweaker, or ITransformationService + ILaunchPluginService). 
+3. Java's ASM (Bytecode Manipulation), from org.objectweb.asm.
+4. Mixins (simple and powerful).
+5. Javassist (also simple and powerful).
+6. Bytebuddy (more advanced but more flexible, it can allocate an Instrumentation instance).
+7. Nashorn (deprecated from Java 11 and removed from Java 15). This provides runtime scripting.
 
 Small notes:
 1. I don't recommend using .jar obfuscators for mods. 
@@ -35,3 +37,4 @@ Small notes:
 - Find information or videos on the internet (but sometimes these only provide basic guidance).
 - Learn by observing what others do (yes, through decompiling and reverse engineering).
 Don't worry about what other people say, because the results always matter, right?
+3. Competition doesn't mean you have to be on the same level as your competitors. (I know it sounds counterintuitive, but you can try to think about it.)
