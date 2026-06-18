@@ -9,22 +9,22 @@ public void entityJoin(EntityJoinWorldEvent event) {
 	if (entity == null) return;
 	if (entity.world == null) return;
   	if (!(entity instanceof EntityPlayer)) { // You can choose to track players or not.
-    ENTITIES.add(entity);
-  }
+    	ENTITIES.add(entity);
+  	}
 }
 // When you want to perform a range attack, you can use, for example:
 public static void attackAll(Player org) {
-  if (org == null) return;
+  	if (org == null) return;
 	Set<Entity> toKill = new HashSet<>();
-  for (Entity e : ENTITIES) {
-    if (e != null && e != org) {
-      toKill.add(e); //Add every entities joined.
-    }
-  }
-  toKill.remove(org);
-  for (Entity e : toKill) {
-    // Handle logic in here.
-  }
+  	for (Entity e : ENTITIES) {
+    	if (e != null && e != org) {
+      		toKill.add(e); //Add every entities joined.
+    	}
+  	}
+  	toKill.remove(org);
+  	for (Entity e : toKill) {
+    	// Handle logic in here.
+  	}
 }
 
 // ============= BAN ENTITIES ============= \\
@@ -43,44 +43,43 @@ private static void killEntity(Entity entity) {
 
 @SubscribeEvent
 public void entityJoin(EntityJoinWorldEvent event) {
-  Entity entity = event.getEntity();
-  if (entity.world == null) return;
-  if (entity == null) return;
-  if (isE(entity)) {
-    event.setCanceled(true); // Banned entity.
-  }
+  	Entity entity = event.getEntity();
+  	if (entity == null) return;
+  	if (isE(entity)) {
+    	event.setCanceled(true); // Banned entity.
+  	}
 }
 
 // ============= SET HEALTH FOR LIVING ENTITY ============= \\
 private static void forceSetHealth(EntityLivingBase living, float amount) {
-  NBTTagCompound nbtTagCompound = new NBTTagCompound();
-  living.setHealth(amount);
-  living.getEntityData().setFloat("Health", amount);
-  living.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(amount);
-  living.writeEntityToNBT(nbtTagCompound);
-  nbtTagCompound.setFloat("Health", amount);
-  living.readEntityFromNBT(nbtTagCompound);
-  living.heal(amount);
-  for (EntityDataManager.DataEntry<?> entry : living.getDataManager().getAll()) {
-    if (entry instanceof EntityDataManager.DataEntry && entry.getValue() instanceof Float) {
-      EntityDataManager.DataEntry<Float> floatEntry = (EntityDataManager.DataEntry<Float>) entry;
-      living.getDataManager().set((DataParameter<Float>) floatEntry.getKey(), amount);
-    }
-  }
+  	NBTTagCompound nbtTagCompound = new NBTTagCompound();
+  	living.setHealth(amount);
+  	living.getEntityData().setFloat("Health", amount);
+  	living.getEntityAttribute(SharedMonsterAttributes.MAX_HEALTH).setBaseValue(amount);
+  	living.writeEntityToNBT(nbtTagCompound);
+  	nbtTagCompound.setFloat("Health", amount);
+  	living.readEntityFromNBT(nbtTagCompound);
+  	living.heal(amount);
+  	for (EntityDataManager.DataEntry<?> entry : living.getDataManager().getAll()) {
+    	if (entry instanceof EntityDataManager.DataEntry && entry.getValue() instanceof Float) {
+      		EntityDataManager.DataEntry<Float> floatEntry = (EntityDataManager.DataEntry<Float>) entry;
+      		living.getDataManager().set((DataParameter<Float>) floatEntry.getKey(), amount);
+    	}
+  	}
 }
 
 // ============= USING MINECRAFT SERVER INSTANCE. ============= \\
 private static void findEntitiesOrWorld() {
-  Minecraft mc = Minecraft.getMinecraft();
-  MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
-  IntegratedServer dserver = mc.getIntegratedServer(); // Only for single player world.
-  for (World w : server.worlds) {
-    if (w instanceof WorldServer) {
-      WorldServer ws = (WorldServer) w;
-      // Do something here.
-    }
-  }
-  // Same with dserver.
+  	Minecraft mc = Minecraft.getMinecraft();
+  	MinecraftServer server = FMLCommonHandler.instance().getMinecraftServerInstance();
+  	IntegratedServer dserver = mc.getIntegratedServer(); // Only for single player world.
+  	for (World w : server.worlds) {
+    	if (w instanceof WorldServer) {
+      		WorldServer ws = (WorldServer) w;
+      		// Do something here.
+    	}
+  	}
+  	// Same with dserver.
 }
 
 // ============= FREEZE ENTITIES. ============= \\
@@ -190,12 +189,12 @@ private static void updateEntity(Entity entity) {
 // ============= RENDER ATTACKS ============= \\
 @SubscribeEvent
 public static void onRenderLivingPre(RenderLivingEvent.Pre<?> event) {
-  Entity entity = event.getEntity();
-  if (!(entity instanceof EntityPlayer) && isE(entity)) {
-    entity.width = 0.0f;
-    entity.height = 0.0f;
-    event.setCanceled(true);
-  }
+	Entity entity = event.getEntity();
+  	if (!(entity instanceof EntityPlayer) && isE(entity)) {
+    	entity.width = 0.0f;
+    	entity.height = 0.0f;
+    	event.setCanceled(true);
+  	}
 }
 
 @SubscribeEvent
@@ -217,4 +216,38 @@ private static BufferedImage loadNullImage() {
   }
 }
 // But to use effectively, you may need to use ASM, or Unsafe and Reflection.
+
+// Restart Event Bus after shutdown.
+// import org.apache.commons.lang3.reflect.FieldUtils;
+// Cannot against Event Bus unregisters or Event Bus instance replacements.
+try {
+	Field shutdownField = FieldUtils.getDeclaredField(EventBus.class, "shutdown", true); // You may use ObfuscationReflectionHelper. But this field isn't obfuscated.
+	if (shutdownField != null && (boolean) FieldUtils.readField(shutdownField, MinecraftForge.EVENT_BUS)) {
+		FieldUtils.writeField(shutdownField, MinecraftForge.EVENT_BUS, false);
+	}
+} catch (IllegalAccessException e) {
+	e.printStackTrace();
+}
+
+// Getting Unsafe instance.
+// import sun.misc.Unsafe;
+// Still avaiable for Java 8.
+public static Unsafe getUnsafeInstance() {
+	try {
+		try {
+			Class<?> scalaUnsafeClass = Class.forName("scala.concurrent.util.Unsafe");
+            Field instanceField = scalaUnsafeClass.getDeclaredField("instance");
+            instanceField.setAccessible(true);
+            Object unsafeObj = instanceField.get(null);
+            if (unsafeObj instanceof Unsafe) {
+                return (Unsafe) unsafeObj;
+            }
+        } catch (Throwable ignored) {}
+        Field unsafeField = Unsafe.class.getDeclaredField("theUnsafe");
+        unsafeField.setAccessible(true);
+        return (Unsafe) unsafeField.get(null);
+    } catch (Exception e) {
+        throw new RuntimeException("Cannot get Unsafe instance", e);
+    }
+}
 // There will be more updates in the future.
