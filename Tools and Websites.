@@ -9,9 +9,15 @@ Note: I used mmv.wagyourtail.xyz sometimes for Minecraft Forge 1.12.2 mappings, 
 Note: You can use IDA (Interactive Disassembler), it has more features than dogbolt. Or you can try Ghidra.
 
 // ========== TOOLS ========== \\
-1. IDE (Integrated Development Environment). The most common is IntelliJ IDEA.
+1. IDE (Integrated Development Environment). The most common is IntelliJ IDEA, or you can try Eclipse (portable and lighter than IntelliJ IDEA).
 2. JD-GUI (Java Decompiler Graphical User Interface). Again, people may call you a coward, but do you care if you're the one getting results?
-3. HMCL (Hello! Minecraft Launcher) by Glavo. This is a famous Minecraft launcher.
-4. MCreator (basic tool for modding), you can use this to help you create a workspace. So you don't have to worry about gradle's setup.
-5. One Drive (actually this is a service). It will help you store your workspace, create backups, etc. You can also use Github.
+3. HMCL (Hello! Minecraft Launcher) by Glavo. This is a famous Minecraft launcher and I always use this for quick testing/recording videos for Minecraft MS.
+4. MCreator (basic tool for modding), you can use this to help you create a workspace. So you don't have to worry about gradle's setup. You can use MCrecator in combination with another IDE.
+5. One Drive (actually this is a service). It will help you store your workspaces, create backups, etc. You can also use Github, with GitHub, you can save your changes.
 6. Cheat engine(s) (if you are working with native level, but if you have the ability to deal with C++, I think you don't need these lists anymore).
+
+// ========== FAMOUS LIBRARIES AND APPLICATION PROGRAMMING INTERFACES ========== \\
+1. Java's ASM (Bytecode Manipulation), from org.objectweb.asm.
+2. Mixins (simple and powerful).
+3. Javassist (also simple and powerful).
+4. Bytebuddy (more advanced but more flexible, it can allocate an Instrumentation instance).
