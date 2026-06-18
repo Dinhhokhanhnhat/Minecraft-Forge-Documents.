@@ -3,7 +3,7 @@
 2. https://mappings.dev/ (for newer Forge versions).
 Note: I used mmv.wagyourtail.xyz sometimes for Minecraft Forge 1.12.2 mappings, because mappings.dev didn't help.
 3. http://github.com/ (yeah it is truly helpful, you can also download libraries or check other's work).
-4. https://www.virustotal.com/ (use this to scan files, ensuring the safety of the equipment).
+4. https://www.virustotal.com/ (use this to scan files, ensuring the safety of your devices).
 5. https://www.javadecompilers.com/ (others may say you're a coward, but do you care?)
 6. https://dogbolt.org/ (decompiling binary files, .dll/.so/.dylib/.exe...).
 Note: You can use IDA (Interactive Disassembler), it has more features than dogbolt. Or you can try Ghidra.
@@ -15,6 +15,8 @@ Note: You can use IDA (Interactive Disassembler), it has more features than dogb
 4. MCreator (basic tool for modding), you can use this to help you create a workspace. So you don't have to worry about gradle's setup. You can use MCrecator in combination with another IDE.
 5. One Drive (actually this is a service). It will help you store your workspaces, create backups, etc. You can also use Github, with GitHub, you can save your changes.
 6. Cheat engine(s) (if you are working with native level, but if you have the ability to deal with C++, I think you don't need these lists anymore).
+7. FernFlower or Vineflower (also java decompilers).
+8. Recaf.
 
 // ========== FAMOUS LIBRARIES AND APPLICATION PROGRAMMING INTERFACES ========== \\
 1. Access Transformer (AT - accesstransformer.cfg or extra_at.cfg).
@@ -24,6 +26,8 @@ Note: You can use IDA (Interactive Disassembler), it has more features than dogb
 5. Javassist (also simple and powerful).
 6. Bytebuddy (more advanced but more flexible, it can allocate an Instrumentation instance).
 7. Nashorn (deprecated from Java 11 and removed from Java 15). This provides runtime scripting.
+8. Reflection, Unsafe, MethodHandles.Lookup + VarHandle + MethodHandle.
+9. MCP (Minecraft Coder Pack) - for older Minecraft Forge modding.
 
 Small notes:
 1. I don't recommend using .jar obfuscators for mods. 
@@ -38,3 +42,4 @@ Small notes:
 - Learn by observing what others do (yes, through decompiling and reverse engineering).
 Don't worry about what other people say, because the results always matter, right?
 3. Competition doesn't mean you have to be on the same level as your competitors. (I know it sounds counterintuitive, but you can try to think about it.)
+4. Do you think a mod's license is important? I won't say anything about this, but you might want to think about it...
