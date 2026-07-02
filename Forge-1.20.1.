@@ -60,38 +60,91 @@ private static boolean isDifferentScreen(Screen screen) {
     return !Arrays.<String>asList(allValidScreen).contains(screen.getClass().getName()); // I think it can be HashSet instead of Arrays.
 }
 
-// ============= WIPE (NON-FINAL) FIELDS ============= \\
-private static void saferWipeField0(Object obj) {
-    if (obj == null) return;
-	Class<?> clazz = obj.getClass();
-	for (Field f : clazz.getDeclaredFields()) {
-	    try {
-	        f.setAccessible(true); // Shold we skip final fields?
-	        Class<?> type = f.getType();
-	        if (type == boolean.class) {
-	            f.setBoolean(obj, false);
-	            continue;
-	        }
-	        if (type == int.class || type == short.class || type == byte.class || type == long.class) {
-	            f.set(obj, 0);
-	            continue;
-	        }
-	        if (type == float.class) {
-	            f.setFloat(obj, 0f);
-	            continue;
-	        }
-	        if (type == double.class) {
-	            f.setDouble(obj, 0d);
-	            continue;
-	        }
-	        if (type == char.class) {
-	            f.setChar(obj, '\0');
-	            continue;
-	        }
-
-	        // f.set(obj, null);
-	        // Setting null may cause crash, you probably have to handle this yourself.
-	    } catch (Throwable ignored) {}
+// ============= WIPE (NON-FINAL) DATA ============= \\
+private static void wipeData(Entity entity) {
+	if (entity == null) return;
+	// Forge specific.
+	try {
+	    FieldUtils.writeField(entity, "isAddedToWorld", Boolean.valueOf(false), true);
+	    FieldUtils.writeField(entity, "canUpdate", Boolean.valueOf(false), true);
+	    FieldUtils.writeField(entity, "valid", Boolean.valueOf(false), true);
+	    FieldUtils.writeField(entity, "initialized", Boolean.valueOf(false), true);
+		FieldUtils.writeField(entity, "isLazy", Boolean.valueOf(false), true);
+	} catch (Throwable e) {
+		e.printStackTrace();
+	}
+	// Java wiping.
+	try {
+		Field[] fields = entity.getClass().getDeclaredFields();
+		for (Field field : fields) {
+			field.setAccessible(true);
+			int modifiers = field.getModifiers();
+			if (!Modifier.isFinal(modifiers)) {
+			    Class<?> clazz = field.getType();
+			    Object target = Modifier.isStatic(modifiers) ? null : entity;
+			    try {
+			        if (clazz == boolean.class) {
+			            field.setBoolean(target, false);
+			        } else if (clazz == byte.class) {
+			            field.setByte(target, (byte) 0);
+			        } else if (clazz == short.class) {
+			            field.setShort(target, (short) 0);
+			        } else if (clazz == int.class) {
+			            field.setInt(target, 0);
+			        } else if (clazz == long.class) {
+			            field.setLong(target, 0L);
+			        } else if (clazz == float.class) {
+			            field.setFloat(target, 0.0F);
+			        } else if (clazz == double.class) {
+			            field.setDouble(target, 0.0D);
+			        } else if (clazz == Boolean.class) {
+			            field.set(target, Boolean.FALSE);
+			        } else if (clazz == Byte.class) {
+			            field.set(target, Byte.valueOf((byte) 0));
+			        } else if (clazz == Short.class) {
+			            field.set(target, Short.valueOf((short) 0));
+			        } else if (clazz == Integer.class) {
+			            field.set(target, Integer.valueOf(0));
+			        } else if (clazz == Long.class) {
+			            field.set(target, Long.valueOf(0L));
+			        } else if (clazz == Float.class) {
+			            field.set(target, Float.valueOf(0.0F));
+			        } else if (clazz == Double.class) {
+			            field.set(target, Double.valueOf(0.0D));
+			        } else if (clazz == String.class) {
+			            field.set(target, "");
+			        } else if (Collection.class.isAssignableFrom(clazz)) {
+						Collection<?> collection = (Collection<?>) field.get(target);
+						if (collection != null) {
+							collection.clear();
+						}
+					} else if (Iterable.class.isAssignableFrom(clazz)) {
+						Iterable<?> iterable = (Iterable<?>) field.get(target);
+						if (iterable != null) {
+							Iterator<?> iterator = iterable.iterator();
+							while (iterator.hasNext()) {
+							    iterator.next();
+							    try {
+							        iterator.remove();
+							    } catch (Throwable t) {}
+							}
+						}
+					} else if (Field.class.isAssignableFrom(clazz)) {
+						field.set(target, null); // Do this if you want to intercept mod.
+					} else if (Method.class.isAssignableFrom(clazz)) {
+						field.set(target, null); // Do this if you want to intercept mod.
+					} else if (Entity.RemovalReason.class.isAssignableFrom(clazz)) {
+						field.set(target, Entity.RemovalReason.DISCARDED);
+					} else if (sun.misc.Unsafe.isAssignableFrom(clazz)) {
+						field.set(target, null); // Do this if you want to intercept mod.
+					}
+			    } catch (Throwable t) {
+			        t.printStackTrace();
+			    }
+			}
+		}
+	} catch (Throwable t) {
+		t.printStackTrace();
 	}
 }
 
