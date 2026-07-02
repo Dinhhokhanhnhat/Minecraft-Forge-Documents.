@@ -148,23 +148,28 @@ private static void wipeData(Entity entity) {
 	}
 }
 
-// ============= GET ENTITY RENDERER ============= \\
-public static EntityRenderer<? super Entity> getRendererOf(Entity entity) {
-	if (entity == null) return null;
-	Minecraft mc = Minecraft.getInstance();
-	EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
-	@SuppressWarnings("unchecked")
-	EntityRenderer<? super Entity> renderer = (EntityRenderer<? super Entity>) dispatcher.renderers.get(entity.getType());
-	if (renderer == null) renderer = (EntityRenderer<? super Entity>) dispatcher.getRenderer(entity);
-	return renderer;
-}
-
 // ============= NULL RENDERER CLASS AND INSTANCE ============= \\
 private static final Minecraft mc = Minecraft.getInstance();
+private static Map<EntityType<?>, EntityRenderer<?>> orgRenderer = null;
 public static final NullRenderer<Entity> nullRender = new NullRenderer(new EntityRendererProvider.Context(
 		mc.getEntityRenderDispatcher(), mc.getItemRenderer(),
 		mc.getBlockRenderer(), mc.gameRenderer.itemInHandRenderer,
 		mc.getResourceManager(), mc.getEntityModels(), mc.font)); // Cache so that we don't have to recreate instance.
+
+private static void killRenderer(Entity e) {
+	if (e == null) return;
+	EntityRenderDispatcher dispatcher = mc.getEntityRenderDispatcher();
+	Map<EntityType<?>, EntityRenderer<?>> originalRenderers = dispatcher.renderers;
+	if (orgRenderer == null) orgRenderer = originalRenderers;
+	ImmutableMap.Builder<EntityType<?>, EntityRenderer<?>> builder = ImmutableMap.builder();
+	for (Map.Entry<EntityType<?>, EntityRenderer<?>> entry : originalRenderers.entrySet()) {
+	    if (entry.getKey().equals(e.getType())) builder.put(entry.getKey(), nullRenderer);
+	    else builder.put(entry.getKey(), entry.getValue());
+	}
+	dispatcher.setRenderHitBoxes(false);
+	dispatcher.setRenderShadow(false);
+	dispatcher.renderers = builder.build();
+}
 
 public static class NullRenderer<T extends Entity> extends EntityRenderer<T> {
 	
@@ -174,28 +179,54 @@ public static class NullRenderer<T extends Entity> extends EntityRenderer<T> {
 	    this.shadowStrength = 0f;
 	}
 
+	@Override
    	protected int getSkyLightLevel(T p_114509_, BlockPos p_114510_) {
       	return 0;
    	}
 
+	@Override
    	protected int getBlockLightLevel(T p_114496_, BlockPos p_114497_) {
       	return 0;
    	}
 
+	@Override
    	public boolean shouldRender(T p_114491_, Frustum p_114492_, double p_114493_, double p_114494_, double p_114495_) {
 		return false;
    	}
 
+	@Override
    	public void render(T p_114485_, float p_114486_, float p_114487_, PoseStack p_114488_, MultiBufferSource p_114489_, int p_114490_) {}
 
+	@Override
    	protected boolean shouldShowName(T p_114504_) {
       	return false;
    	}
 
+	@Override
    	public ResourceLocation getTextureLocation(T p_114482_) {
-   		return null;
+   		return null; // Or a ResourceLocation to a blank image.
    	}
 
+	@Override
    	protected void renderNameTag(T p_114498_, Component p_114499_, PoseStack p_114500_, MultiBufferSource p_114501_, int p_114502_) {}
 }
+
+private static void rangeAtkEntities(Player org, int range) {
+	if (org == null) return;
+	if (range == 0) return; // What?
+	Level world = org.level();
+	Vec3 center = org.position();
+	AABB box = new AABB(
+	    center.x - range, center.y - range, center.z - range,
+	    center.x + range, center.y + range, center.z + range
+	);
+	Set<Entity> entitySet = new HashSet<>();
+	List<Entity> entities = world.getEntities(EntityTypeTest.forClass(Entity.class), box, e -> e != org);
+	List<Entity> list = world.getEntitiesOfClass(Entity.class, box, e -> e != org);
+	entitySet.addAll(list);
+    entitySet.addAll(entities);
+	entitySet.remove(org);
+	// To attack: for (Entity target : entitySet) if (target != null && target != org) killTarget(target);
+}
+// Usage: rangeAtkEntities(player, (int) 20);
 // There will be more updates in the future.
