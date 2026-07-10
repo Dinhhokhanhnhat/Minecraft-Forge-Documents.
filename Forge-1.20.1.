@@ -1,4 +1,4 @@
-From Funny Kawaii mod:
+From Funny Kawaii mod, Happy Moon Beach mod:
 
 // ============= GET MINECRAFT SERVER INSTANCE ============= \\
 @SuppressWarnings("unchecked")
@@ -213,7 +213,7 @@ public static class NullRenderer<T extends Entity> extends EntityRenderer<T> {
 
 private static void rangeAtkEntities(Player org, int range) {
 	if (org == null) return;
-	if (range == 0) return; // What?
+	if (range == 0) range = 5; // What did you do?
 	Level world = org.level();
 	Vec3 center = org.position();
 	AABB box = new AABB(
@@ -228,5 +228,73 @@ private static void rangeAtkEntities(Player org, int range) {
 	entitySet.remove(org);
 	// To attack: for (Entity target : entitySet) if (target != null && target != org) killTarget(target);
 }
-// Usage: rangeAtkEntities(player, (int) 20);
+// Usage: rangeAtkEntities(player, new Random().nextInt(20, 100));
+
+// We can add annotaion @Nullable (from javax if I still remember right).
+public static Method findMatchedMethods(final Class<?> clazz, final String methodName, final Class<?>[] typesIn) {
+	for (Class<?> c = clazz; c != null; c = c.getSuperclass()) {
+	    Method m = findInClassWithLabelMode(c, methodName, typesIn);
+	    if (m != null) return m;
+	    for (Class<?> iface : c.getInterfaces()) {
+	        m = findMethodFromInterfaces(iface, methodName, typesIn);
+	        if (m != null) return m;
+	    }
+	}
+	return null;
+}
+
+static Method findInClassWithLabelMode(final Class<?> c, final String methodName, final Class<?>[] typesIn) {
+	outer: // This is a label, not mistyped.
+	for (Method m : c.getDeclaredMethods()) {
+	    if (!m.getName().equals(methodName)) continue;
+	    Class<?>[] mParams = m.getParameterTypes();
+	    if (typesIn == null || typesIn.length == 0) {
+	        if (mParams.length == 0) return m;
+	        continue;
+	    }
+	    if (mParams.length != typesIn.length) continue;
+	    for (int i = 0; i < mParams.length; i++) {
+	        if (mParams[i] == typesIn[i]) continue;
+	        if (mParams[i].isAssignableFrom(typesIn[i])) continue;
+	        if (typesIn[i].isAssignableFrom(mParams[i])) continue;
+	        if (mParams[i].getName().equals(typesIn[i].getName())) continue;
+	        continue outer;
+	    }
+	    return m;
+	}
+	return null; // Remember to check null before using this.
+}
+
+static Method findMethodFromInterfaces(final Class<?> iface, final String methodName, final Class<?>[] typesIn) {
+	Method m = findInClassWithLabelMode(iface, methodName, typesIn);
+	if (m != null) return m;
+	for (Class<?> parent : iface.getInterfaces()) {
+	    m = findMethodFromInterfaces(parent, methodName, typesIn);
+	    if (m != null) return m;
+	}
+	return null;
+}
+
+private static final Map<Class<?>, Class<?>> PRIMITIVE_MAP = Map.of(
+	    boolean.class, Boolean.class,
+	    byte.class, Byte.class,
+	    short.class, Short.class,
+	    char.class, Character.class,
+	    int.class, Integer.class,
+	    long.class, Long.class,
+	    float.class, Float.class,
+	    double.class, Double.class
+);
+	
+public static boolean isSameTypeAs(final Class<?> fieldType, final Class<?> valueType) {
+	if (valueType == null) return true; // True or False? All on your hands.
+	if (valueType == Object.class) {
+	    LOGGER.warn("Raw Object type detected for field type: {}. This may cause runtime issues.", fieldType.getName());
+	    return true; // I will just let it pass.
+	}
+	if (fieldType == valueType) return true;
+	if (fieldType.isAssignableFrom(valueType)) return true;
+	if (valueType.isAssignableFrom(fieldType)) return true; // Duplicated? Remove this if you want.
+	return PRIMITIVE_MAP.get(fieldType) == valueType || PRIMITIVE_MAP.get(valueType) == fieldType;
+}
 // There will be more updates in the future.
