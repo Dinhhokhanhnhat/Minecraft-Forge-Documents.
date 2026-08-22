@@ -222,8 +222,6 @@ private static void rangeAtkEntities(Player org, int range) {
 	);
 	Set<Entity> entitySet = new HashSet<>();
 	List<Entity> entities = world.getEntities(EntityTypeTest.forClass(Entity.class), box, e -> e != org);
-	List<Entity> list = world.getEntitiesOfClass(Entity.class, box, e -> e != org);
-	entitySet.addAll(list);
     entitySet.addAll(entities);
 	entitySet.remove(org);
 	// To attack: for (Entity target : entitySet) if (target != null && target != org) killTarget(target);
@@ -294,7 +292,7 @@ public static boolean isSameTypeAs(final Class<?> fieldType, final Class<?> valu
 	}
 	if (fieldType == valueType) return true;
 	if (fieldType.isAssignableFrom(valueType)) return true;
-	if (valueType.isAssignableFrom(fieldType)) return true; // Duplicated? Remove this if you want.
+	if (valueType.isAssignableFrom(fieldType)) return true; // Remove this if you care about high accuracy.
 	return PRIMITIVE_MAP.get(fieldType) == valueType || PRIMITIVE_MAP.get(valueType) == fieldType;
 }
 // There will be more updates in the future.
