@@ -1,11 +1,11 @@
 // ========== WEBSITES ========== \\
 1. https://mmv.wagyourtail.xyz/ (for older Forge versions).
 2. https://mappings.dev/ (for newer Forge versions).
-Note: I used mmv.wagyourtail.xyz sometimes for Minecraft Forge 1.12.2 mappings, because mappings.dev didn't help.
+Note: I used mmv.wagyourtail.xyz sometimes for Minecraft Forge 1.12.2 mappings, because mappings.dev couldn't help.
 3. http://github.com/ (yeah it is truly helpful, you can also download libraries or check other's work).
 4. https://www.virustotal.com/ (use this to scan files, ensuring the safety of your devices).
 5. https://www.javadecompilers.com/ (others may say you're a coward, but do you care?)
-6. https://dogbolt.org/ (decompiling binary files, .dll/.so/.dylib/.exe...).
+6. https://dogbolt.org/ (decompiling binary files, e.g .dll, .so, .dylib).
 Note: You can use IDA (Interactive Disassembler), it has more features than dogbolt. Or you can try Ghidra.
 
 // ========== TOOLS ========== \\
@@ -17,14 +17,16 @@ Note: You can use IDA (Interactive Disassembler), it has more features than dogb
 6. Cheat engine(s) (if you are working with native level, but if you have the ability to deal with C++, I think you don't need these lists anymore).
 7. FernFlower or Vineflower (also java decompilers).
 8. Recaf.
+9. Dumpbin.
+10. HxD (Hex editor).
 
 // ========== FAMOUS LIBRARIES AND APPLICATION PROGRAMMING INTERFACES ========== \\
 1. Access Transformer (AT - accesstransformer.cfg or extra_at.cfg).
-2. Core mod, transformers (IFMLLoadingPlugin + IClassTransformer/ITweaker, or ITransformationService + ILaunchPluginService). 
-3. Java's ASM (Bytecode Manipulation), from org.objectweb.asm.
-4. Mixins (simple and powerful).
+2. Core mod, transformers (IFMLLoadingPlugin + IClassTransformer/ITweaker, or ITransformationService/ImmediateWindowProvider + ILaunchPluginService). 
+3. Mixins (simple and powerful).
+4. Java's ASM (Bytecode Manipulation), from org.objectweb.asm.
 5. Javassist (also simple and powerful).
-6. Bytebuddy (more advanced but more flexible, it can allocate an Instrumentation instance).
+6. Bytebuddy (advanced and flexible, it can allocate an Instrumentation instance).
 7. Nashorn (deprecated from Java 11 and removed from Java 15). This provides runtime scripting.
 8. Reflection, Unsafe, MethodHandles.Lookup + VarHandle + MethodHandle.
 9. MCP (Minecraft Coder Pack) - for older Minecraft Forge modding.
@@ -33,13 +35,13 @@ Small notes:
 1. I don't recommend using .jar obfuscators for mods. 
 - I understand you want to protect your code, but once you make a file public, you have to understand that it will eventually be reverse-engineered.
 - Additionally, popular obfuscators like ProGuard, yGuard, Skidfuscator, etc., are designed to disrupt standalone Java programs. Minecraft mods, however, are a very complex system, so using obfuscators on them can easily cause crashes or undefined behaviors.
-- The best ways to protect code are:
+- The best ways to protect your code:
 + Rename field, method, class names before compiling. But remember not to rename important classes, for examples, main mod class.
 + Do not share your files. Okay, it sounds ridiculous, but it's absolutely true.
 2. To go far on this path, you ought to accept learning from others, including:
 - Seek advices from others.
 - Find information or videos on the internet (but sometimes these only provide basic guidance).
-- Learn by observing what others do (yes, through decompiling and reverse engineering).
+- Learn from other people (through reading their public projects, decompiling and reverse engineering).
 Don't worry about what other people say, because the results always matter, right?
-3. Competition doesn't mean you have to be on the same level as your competitors. (I know it sounds counterintuitive, but you can try to think about it.)
+3. Competition doesn't mean you have to be on the same level as your competitors. (I know it sounds counterintuitive, but you can try to think about it).
 4. Do you think a mod's license is important? I won't say anything about this, but you might want to think about it...
